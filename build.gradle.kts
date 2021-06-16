@@ -27,6 +27,7 @@ micronaut {
 
 dependencies {
     kapt("io.micronaut.data:micronaut-data-processor")
+    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")

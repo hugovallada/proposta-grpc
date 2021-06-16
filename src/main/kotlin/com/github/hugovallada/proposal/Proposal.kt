@@ -20,7 +20,7 @@ class Proposal(
     val email: String,
     @field:NotBlank
     val name: String,
-    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @field:Valid
     val address: Address,
     @field:NotNull @field:Positive
@@ -29,6 +29,9 @@ class Proposal(
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id : Long? = null
+
+    @Enumerated(EnumType.STRING)
+    var status: ProposalStatus? = null
 
     val externalId: UUID = UUID.randomUUID()
 }
