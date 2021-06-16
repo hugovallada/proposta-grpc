@@ -7,14 +7,26 @@ option objc_class_prefix = "HLW";
 
 package com.github.hugovallada;
 
-service PropostaGrpcService {
-  rpc send (PropostaGrpcRequest) returns (PropostaGrpcReply) {}
+service CreateProposal {
+  rpc send (NewProposalGrpcRequest) returns (NewProposalGrpcResponse) {}
 }
 
-message PropostaGrpcRequest {
-  string name = 1;
+message NewProposalGrpcRequest{
+  string document = 1;
+  string email = 2;
+  string name = 3;
+  AddressGrpc address = 4;
+  string salary = 5;
 }
 
-message PropostaGrpcReply {
-  string message = 1;
+message NewProposalGrpcResponse{
+  string idProposal = 1;
+}
+
+message AddressGrpc{
+  string city = 1;
+  string state = 2;
+  string number = 3;
+  string cep = 4;
+  string extension = 5;
 }
