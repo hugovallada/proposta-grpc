@@ -1,0 +1,6 @@
+applicationType: grpc
+defaultPackage: com.github.hugovallada
+testFramework: junit
+sourceLanguage: kotlin
+buildTool: gradle_kotlin
+features: [annotation-api, app-name, data, data-jpa, flyway, gradle, grpc, hamcrest, hibernate-validator, jdbc-hikari, junit, kotlin, kotlin-application, logback, mockito, postgres, readme, shade, testcontainers, yaml]

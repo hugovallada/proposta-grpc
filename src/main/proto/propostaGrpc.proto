@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.github.hugovallada";
+option java_outer_classname = "PropostaGrpc";
+option objc_class_prefix = "HLW";
+
+package com.github.hugovallada;
+
+service PropostaGrpcService {
+  rpc send (PropostaGrpcRequest) returns (PropostaGrpcReply) {}
+}
+
+message PropostaGrpcRequest {
+  string name = 1;
+}
+
+message PropostaGrpcReply {
+  string message = 1;
+}
