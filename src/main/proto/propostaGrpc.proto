@@ -8,7 +8,7 @@ option objc_class_prefix = "HLW";
 package com.github.hugovallada;
 
 service CreateProposal {
-  rpc send (NewProposalGrpcRequest) returns (NewProposalGrpcResponse) {}
+  rpc create (NewProposalGrpcRequest) returns (NewProposalGrpcResponse) {}
 }
 
 message NewProposalGrpcRequest{
