@@ -20,7 +20,7 @@ class Proposal(
     val email: String,
     @field:NotBlank
     val name: String,
-    @ManyToOne(cascade = [CascadeType.MERGE])
+    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST])
     @field:Valid
     val address: Address,
     @field:NotNull @field:Positive

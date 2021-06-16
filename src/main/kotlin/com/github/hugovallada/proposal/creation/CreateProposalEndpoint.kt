@@ -13,6 +13,10 @@ import javax.validation.Validator
 class CreateProposalEndpoint(private val proposalService: CreateProposalService, val validator: Validator) :
     CreateProposalGrpc.CreateProposalImplBase() {
     override fun create(request: NewProposalGrpcRequest, responseObserver: StreamObserver<NewProposalGrpcResponse>) {
-        proposalService.create(request.toModel().isValid(validator))
+        proposalService.create(request.toModel().isValid(validator)).run {
+            responseObserver.onNext(NewProposalGrpcResponse.newBuilder().setIdProposal(externalId.toString()).build())
+        }
+
+        responseObserver.onCompleted()
     }
 }
