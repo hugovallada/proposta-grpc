@@ -1,6 +1,7 @@
 package com.github.hugovallada.proposal
 
 import com.github.hugovallada.address.Address
+import com.github.hugovallada.credit_card.CreditCard
 import com.github.hugovallada.shared.validator.Document
 import java.math.BigDecimal
 import java.util.*
@@ -32,6 +33,10 @@ class Proposal(
 
     @Enumerated(EnumType.STRING)
     var status: ProposalStatus? = null
+
+    @OneToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST])
+    @JoinColumn(name = "credit_card_id", referencedColumnName = "id")
+    var creditCard: CreditCard? = null
 
     val externalId: UUID = UUID.randomUUID()
 }
