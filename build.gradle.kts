@@ -27,6 +27,7 @@ micronaut {
 
 dependencies {
     kapt("io.micronaut.data:micronaut-data-processor")
+    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
@@ -43,6 +44,8 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:testcontainers")
     implementation("io.micronaut:micronaut-validation")
+    implementation("org.hibernate:hibernate-validator:6.1.6.Final")
+
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 

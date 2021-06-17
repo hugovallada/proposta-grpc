@@ -1,0 +1,1 @@
+ALTER TABLE tb_proposal ADD COLUMN status varchar(15);
