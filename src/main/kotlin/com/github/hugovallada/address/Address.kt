@@ -14,7 +14,6 @@ class Address(
     val cep: String,
     @field:NotBlank
     val number: String,
-    @field:NotBlank
     val extension: String
 ) {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
