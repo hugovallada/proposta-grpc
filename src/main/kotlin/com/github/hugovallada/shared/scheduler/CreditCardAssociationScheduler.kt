@@ -24,13 +24,11 @@ class CreditCardAssociationScheduler(
             forEach {
                 proposal ->
                 try{
-                    creditCardClient.getCreditCard(proposal.id.toString()).let {
-                        if(it.status.code != 200 || it.body == null) throw IllegalStateException("That should never happened")
-
-                        proposal.creditCard = it.body()?.toModel() ?: throw java.lang.IllegalStateException("That should never happened")
-
+                    creditCardClient.getCreditCard(proposal.id.toString()).doOnSuccess {
+                        creditCard ->
+                        proposal.creditCard = creditCard.toModel()
                         proposalRepository.update(proposal)
-                    }
+                    }.subscribe()
                 }catch (exception: HttpClientResponseException){
                     LOG.info("Something went wrong")
                 }
