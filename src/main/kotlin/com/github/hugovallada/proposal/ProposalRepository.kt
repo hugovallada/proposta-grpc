@@ -3,6 +3,7 @@ package com.github.hugovallada.proposal
 import io.micronaut.data.annotation.Query
 import io.micronaut.data.annotation.Repository
 import io.micronaut.data.jpa.repository.JpaRepository
+import java.util.*
 
 @Repository
 interface ProposalRepository : JpaRepository<Proposal, Long> {
@@ -13,4 +14,6 @@ interface ProposalRepository : JpaRepository<Proposal, Long> {
 
     @Query("SELECT * from tb_proposal where status = 'ELIGIBLE' and credit_card_id is null", nativeQuery = true)
     fun proposalReadyForAssociation(): List<Proposal>
+
+    fun findByExternalId(id: UUID): Proposal?
 }
