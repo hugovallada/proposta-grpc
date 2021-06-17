@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull
 import javax.validation.constraints.PositiveOrZero
 
 @Entity
+@Table(name = "tb_credit_card")
 class CreditCard(
     @field:NotBlank
     val number: String,

@@ -13,6 +13,7 @@ import com.github.hugovallada.shared.external.analysis.AnalysisProposalResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.mockito.Mockito
 import java.math.BigDecimal
 import javax.inject.Inject
+import javax.transaction.Transactional
 
 @MicronautTest(transactional = false)
 internal class CreateProposalEndpointTest(
@@ -66,7 +68,6 @@ internal class CreateProposalEndpointTest(
         }
     }
 
-    // TODO: Test is working when running alone, but fails when run with all the others
     @Test
     internal fun `should create a new proposal in the database and return it's external id when it's not eligible`(){
         val request = NewProposalGrpcRequest.newBuilder()
