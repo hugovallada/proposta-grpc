@@ -6,6 +6,7 @@ import com.github.hugovallada.NewProposalGrpcRequest
 import com.github.hugovallada.address.Address
 import com.github.hugovallada.proposal.Proposal
 import com.github.hugovallada.proposal.ProposalRepository
+import com.github.hugovallada.proposal.ProposalStatus
 import com.github.hugovallada.shared.external.analysis.AnalysisClient
 import com.github.hugovallada.shared.external.analysis.AnalysisProposalRequest
 import com.github.hugovallada.shared.external.analysis.AnalysisProposalResponse
@@ -16,6 +17,7 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.hamcrest.MatcherAssert
@@ -42,6 +44,7 @@ internal class CreateProposalEndpointTest(
         proposalRepository.deleteAll()
     }
 
+
     @Test
     internal fun `should create a new proposal in the database and return it's external id when it's eligible`(){
         val request = NewProposalGrpcRequest.newBuilder()
@@ -63,6 +66,7 @@ internal class CreateProposalEndpointTest(
         }
     }
 
+    // TODO: Test is working when running alone, but fails when run with all the others
     @Test
     internal fun `should create a new proposal in the database and return it's external id when it's not eligible`(){
         val request = NewProposalGrpcRequest.newBuilder()
@@ -74,15 +78,18 @@ internal class CreateProposalEndpointTest(
                 .setExtension("").build())
             .build()
 
-        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","1")))
-            .thenReturn(HttpResponse.badRequest())
+        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","2")))
+            .thenThrow(HttpClientResponseException::class.java)
 
         val response = grpcClient.create(request)
         with(response){
             assertTrue(idProposal.length == 36)
             assertTrue(proposalRepository.existsByDocument("32605826066"))
+            assertEquals(ProposalStatus.NOT_ELIGIBLE, proposalRepository.findByDocument("32605826066")?.status)
         }
     }
+
+
 
     @Test
     internal fun `should return status already exists when someone tries to create a proposal with an already existing document`(){
