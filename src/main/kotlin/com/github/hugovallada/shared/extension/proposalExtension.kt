@@ -3,6 +3,7 @@ package com.github.hugovallada.shared.extension
 import com.github.hugovallada.NewProposalGrpcRequest
 import com.github.hugovallada.address.Address
 import com.github.hugovallada.proposal.Proposal
+import com.github.hugovallada.proposal.ProposalStatus
 import javax.validation.ConstraintViolationException
 import javax.validation.Validator
 
@@ -28,3 +29,4 @@ fun Proposal.isValid(validator: Validator): Proposal {
     }
     return this
 }
+
