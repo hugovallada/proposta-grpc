@@ -77,9 +77,9 @@ tasks {
         }
     }
 
-    test{
-        useJUnitPlatform()
-    }
+//    test{
+//        useJUnitPlatform()
+//    }
 
 
 }

@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull
 @Entity
 @Table(name = "tb_biometry")
 class Biometry(
-    @field:NotBlank
+    @field:NotBlank(message = "Should not be blank")
     val fingerPrint: String,
     @ManyToOne @field:NotNull @field:Valid
     val creditCard: CreditCard
