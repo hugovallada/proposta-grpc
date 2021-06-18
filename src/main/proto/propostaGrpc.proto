@@ -15,6 +15,19 @@ service ProposalStatus{
    rpc watch(ProposalStatusGrpcRequest) returns (ProposalStatusGrpcResponse){}
 }
 
+service BiometryAssign{
+  rpc assign(BiometryGrpcRequest) returns (BiometryGrpcResponse){}
+}
+
+message BiometryGrpcRequest{
+  string cardNumber = 1;
+  string fingerPrint = 2;
+}
+
+message BiometryGrpcResponse{
+  string id = 1;
+}
+
 message ProposalStatusGrpcRequest{
   string id = 1;
 }

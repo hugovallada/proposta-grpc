@@ -1,0 +1,1 @@
+ALTER TABLE tb_biometry ADD COLUMN external_id uuid not null;
