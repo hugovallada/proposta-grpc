@@ -1,0 +1,1 @@
+update tb_credit_card set locked=false;
