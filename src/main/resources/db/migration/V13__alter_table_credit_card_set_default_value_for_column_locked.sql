@@ -1,0 +1,1 @@
+ALTER TABLE tb_credit_card ALTER COLUMN locked SET default false;

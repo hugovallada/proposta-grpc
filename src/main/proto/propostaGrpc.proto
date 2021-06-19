@@ -19,6 +19,20 @@ service BiometryAssign{
   rpc assign(BiometryGrpcRequest) returns (BiometryGrpcResponse){}
 }
 
+service CardLock{
+  rpc lock(LockGrpcRequest) returns (LockGrpcResponse){}
+}
+
+message LockGrpcRequest {
+  string cardNumber = 1;
+  string clientIp = 2;
+  string userAgent = 3;
+}
+
+message LockGrpcResponse {
+  string message = 1;
+}
+
 message BiometryGrpcRequest{
   string cardNumber = 1;
   string fingerPrint = 2;
