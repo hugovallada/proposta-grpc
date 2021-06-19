@@ -31,7 +31,6 @@ class LockService(
                 creditCardRepository.update(lock.creditCard)
             }
         }catch (exception: HttpClientResponseException){
-            if(exception.status.code != 422) throw IllegalStateException("An unnexpected error has ocurred")
             LOG.info("Something happened, i wasn't possible to lock the credit card")
         }
 
