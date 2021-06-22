@@ -22,3 +22,4 @@ flyway:
   datasources:
     default:
       enabled: true
+      clean-schema: true # faz o create-drop
