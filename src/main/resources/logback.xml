@@ -9,6 +9,8 @@
         </encoder>
     </appender>
 
+    <logger name="org.flywaydb.core" level="DEBUG" />
+
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
