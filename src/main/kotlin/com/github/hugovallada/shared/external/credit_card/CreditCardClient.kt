@@ -15,4 +15,7 @@ interface CreditCardClient {
     @Post("/api/cartoes/{id}/bloqueios")
     fun lockCreditCard(@PathVariable id: String, sistemaResponsavel: String) : HttpResponse<LockCreditCardClientResponse>
 
+    @Post("/api/cartoes/{id}/avisos")
+    fun notificate(@PathVariable id: String, notification: TravelNoticeClientRequest) : Single<TravelNoticeClientResponse>
+
 }

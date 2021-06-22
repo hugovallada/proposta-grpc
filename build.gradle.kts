@@ -45,6 +45,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     implementation("io.micronaut:micronaut-validation")
     implementation("org.hibernate:hibernate-validator:6.1.6.Final")
+    testImplementation("io.kotest:kotest-assertions-core:4.6.0")
 
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -77,9 +78,9 @@ tasks {
         }
     }
 
-//    test{
-//        useJUnitPlatform()
-//    }
+    test{
+        useJUnitPlatform()
+    }
 
 
 }
