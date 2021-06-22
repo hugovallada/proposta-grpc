@@ -7,6 +7,8 @@ option objc_class_prefix = "HLW";
 
 package com.github.hugovallada;
 
+import "google/protobuf/timestamp.proto";
+
 service CreateProposal {
   rpc create (NewProposalGrpcRequest) returns (NewProposalGrpcResponse) {}
 }
@@ -21,6 +23,22 @@ service BiometryAssign{
 
 service CardLock{
   rpc lock(LockGrpcRequest) returns (LockGrpcResponse){}
+}
+
+service TravelNotice{
+  rpc notificate(TravelNoticeGrpcRequest) returns (TravelNoticeGrpcResponse){}
+}
+
+message TravelNoticeGrpcRequest{
+  string cardNumber = 1;
+  string destination = 2;
+  string returnDate = 3;
+  string clientIp = 4;
+  string userAgent = 5;
+}
+
+message TravelNoticeGrpcResponse{
+  string message = 1;
 }
 
 message LockGrpcRequest {
