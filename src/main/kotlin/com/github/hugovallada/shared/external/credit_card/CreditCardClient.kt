@@ -18,4 +18,7 @@ interface CreditCardClient {
     @Post("/api/cartoes/{id}/avisos")
     fun notificate(@PathVariable id: String, notification: TravelNoticeClientRequest) : Single<TravelNoticeClientResponse>
 
+    @Post("/api/cartoes/{id}/carteiras")
+    fun associate(@PathVariable id: String, association: AssociateWalletClientRequest) : AssociateWalletClientResponse?
+
 }

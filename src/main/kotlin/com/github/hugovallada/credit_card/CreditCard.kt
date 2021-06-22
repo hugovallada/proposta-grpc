@@ -1,6 +1,7 @@
 package com.github.hugovallada.credit_card
 
 import com.github.hugovallada.lock.Lock
+import com.github.hugovallada.wallet.Wallet
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import javax.persistence.*
@@ -27,4 +28,17 @@ class CreditCard(
     var id: Long? = null
 
     var locked = false
+
+    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "tb_credit_card_associate_wallet",
+        joinColumns = [JoinColumn(name = "wallet_id")],
+        inverseJoinColumns = [JoinColumn(name = "credit_card_id")]
+    )
+    val wallets: MutableSet<Wallet> = mutableSetOf<Wallet>()
+
+
+    fun associateWallet(wallet: Wallet){
+        this.wallets.add(wallet)
+    }
 }
