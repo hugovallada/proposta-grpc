@@ -29,11 +29,11 @@ class CreditCard(
 
     var locked = false
 
-    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.EAGER)
+    @ManyToMany(cascade = [CascadeType.MERGE], fetch = FetchType.EAGER)
     @JoinTable(
         name = "tb_credit_card_associate_wallet",
-        joinColumns = [JoinColumn(name = "wallet_id")],
-        inverseJoinColumns = [JoinColumn(name = "credit_card_id")]
+        joinColumns = [JoinColumn(name = "credit_card_id", referencedColumnName = "id")],
+        inverseJoinColumns = [JoinColumn(name = "wallet_id", referencedColumnName = "id")]
     )
     val wallets: MutableSet<Wallet> = mutableSetOf<Wallet>()
 

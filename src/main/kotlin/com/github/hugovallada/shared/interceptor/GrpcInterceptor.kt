@@ -31,6 +31,8 @@ class GrpcInterceptor : MethodInterceptor<Any, Any> {
                     .withDescription(exception.message)
                 is UnprocessableEntityException -> Status.ALREADY_EXISTS.withCause(exception)
                     .withDescription(exception.message)
+                is IllegalArgumentException -> Status.INVALID_ARGUMENT.withCause(exception)
+                    .withDescription(exception.message)
                 else -> Status.UNKNOWN.withCause(exception).withDescription("Unknow error ...")
             }.run {
                 response.onError(StatusRuntimeException(this))
