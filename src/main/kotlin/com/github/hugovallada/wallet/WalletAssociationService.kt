@@ -2,6 +2,7 @@ package com.github.hugovallada.wallet
 
 import com.github.hugovallada.AssociateWalletGrpcRequest
 import com.github.hugovallada.credit_card.CreditCardRepository
+import com.github.hugovallada.shared.exception.DuplicateValueException
 import com.github.hugovallada.shared.exception.TargetNotfoundException
 import com.github.hugovallada.shared.exception.UnprocessableEntityException
 import com.github.hugovallada.shared.extension.isValid
@@ -31,7 +32,7 @@ class WalletAssociationService(
         creditCard.wallets.filter {
             it.name == wallet.name
         }.run {
-            if(size >= 1) throw UnprocessableEntityException("This credit card already has been associate with a ${wallet.name} wallet")
+            if(size >= 1) throw DuplicateValueException("This credit card already has been associate with a ${wallet.name} wallet")
         }
 
         return try{

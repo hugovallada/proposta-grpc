@@ -29,7 +29,7 @@ class GrpcInterceptor : MethodInterceptor<Any, Any> {
                     .withDescription(exception.message)
                 is TargetNotfoundException -> Status.NOT_FOUND.withCause(exception)
                     .withDescription(exception.message)
-                is UnprocessableEntityException -> Status.ALREADY_EXISTS.withCause(exception)
+                is UnprocessableEntityException -> Status.FAILED_PRECONDITION.withCause(exception)
                     .withDescription(exception.message)
                 is IllegalArgumentException -> Status.INVALID_ARGUMENT.withCause(exception)
                     .withDescription(exception.message)

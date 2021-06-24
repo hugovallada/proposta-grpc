@@ -10,9 +10,9 @@ import javax.validation.constraints.NotNull
 @Entity
 @Table(name = "tb_wallet")
 class Wallet(
-    @field:NotNull @Enumerated(EnumType.STRING)
+    @field:NotNull(message = "Shouldn't be null") @Enumerated(EnumType.STRING)
     val name: WalletType,
-    @field:Email @field:NotBlank
+    @field:Email(message = "Invalid email") @field:NotBlank(message = "Shouldn't be blank")
     val email: String
 ) {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
