@@ -18,9 +18,13 @@ import io.kotest.matchers.string.shouldContain
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
+import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import io.mockk.every
+import io.mockk.mockk
 import io.reactivex.Single
 import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
@@ -89,8 +93,10 @@ internal class TravelNoticeEndpointTest(private val creditCardRepository: Credit
             .setCardNumber(creditCard.number).setClientIp("0.0.0.0").setDestination(destination)
             .setUserAgent("foxfire").setReturnDate("2021-09-09").build()
 
-        Mockito.`when`(creditCardClient.notificate(creditCard.number, TravelNoticeClientRequest(destination,returnDate)))
-            .thenReturn(Single.just(TravelNoticeClientResponse("CRIADO")))
+
+        every {
+            creditCardClient.notificate(creditCard.number, TravelNoticeClientRequest(destination,returnDate))
+        } returns (Single.just(TravelNoticeClientResponse("CRIADO")))
 
         val response = grpcClient.notificate(request)
         with(response){
@@ -110,8 +116,9 @@ internal class TravelNoticeEndpointTest(private val creditCardRepository: Credit
             .setCardNumber(creditCard.number).setClientIp("0.0.0.0").setDestination(destination)
             .setUserAgent("foxfire").setReturnDate("2021-09-09").build()
 
-        Mockito.`when`(creditCardClient.notificate(creditCard.number, TravelNoticeClientRequest(destination,returnDate)))
-            .thenThrow(HttpClientResponseException::class.java)
+        every {
+            creditCardClient.notificate(creditCard.number, TravelNoticeClientRequest(destination,returnDate))
+        } throws HttpClientResponseException("", HttpResponse.badRequest(""))
 
         val response = grpcClient.notificate(request)
         with(response){
@@ -119,8 +126,10 @@ internal class TravelNoticeEndpointTest(private val creditCardRepository: Credit
         }
     }
 
+
+
     @MockBean(CreditCardClient::class)
-    fun mockClinet() = Mockito.mock(CreditCardClient::class.java)
+    fun mockClient() : CreditCardClient = mockk()
 
     @Factory
     internal class GrpcFactory{
