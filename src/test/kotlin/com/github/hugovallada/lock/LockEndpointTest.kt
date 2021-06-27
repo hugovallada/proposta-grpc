@@ -11,6 +11,9 @@ import com.github.hugovallada.shared.external.credit_card.LockCreditCardClientRe
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
@@ -18,6 +21,8 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
@@ -62,8 +67,8 @@ internal class LockEndpointTest(
         assertThrows<StatusRuntimeException>{
             grpcClient.lock(LockGrpcRequest.newBuilder().setCardNumber("98292929292").build())
         }.run {
-            assertEquals(Status.NOT_FOUND.code,status.code)
-            assertEquals("There's no credit card with number 98292929292", status.description)
+            status.code.shouldBe(Status.NOT_FOUND.code)
+            status.description.shouldBe("There's no credit card with number 98292929292")
         }
     }
 
@@ -72,7 +77,7 @@ internal class LockEndpointTest(
         assertThrows<StatusRuntimeException>{
             grpcClient.lock(LockGrpcRequest.newBuilder().setCardNumber("2938-4620-3045-9042").build())
         }.run {
-            assertEquals(Status.INVALID_ARGUMENT.code,status.code)
+            status.code.shouldBe(Status.INVALID_ARGUMENT.code)
         }
     }
 
@@ -82,38 +87,40 @@ internal class LockEndpointTest(
         assertThrows<StatusRuntimeException> {
             grpcClient.lock(LockGrpcRequest.newBuilder().setCardNumber("2938-4620-3045-9041").setClientIp("0.0.0.0").setUserAgent("firewolf").build())
         }.run {
-            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            status.code.shouldBe(Status.FAILED_PRECONDITION.code)
         }
     }
 
     @Test
     internal fun `should block the card and return a sucess message`() {
-        Mockito.`when`(creditCardClient.lockCreditCard("2938-4620-3045-9042", "grpc"))
-            .thenReturn(HttpResponse.ok(LockCreditCardClientResponse(resultado = "BLOQUEADO")))
+
+        every {
+            creditCardClient.lockCreditCard("2938-4620-3045-9042", "grpc")
+        } returns HttpResponse.ok(LockCreditCardClientResponse(resultado = "BLOQUEADO"))
 
         val response = grpcClient.lock(LockGrpcRequest.newBuilder().setCardNumber("2938-4620-3045-9042").setClientIp("0.0.0.0").setUserAgent("firewolf").build())
         with(response){
-            assertTrue(creditCardRepository.findByNumber("2938-4620-3045-9042")!!.locked)
-            assertEquals("Credit card 2938-4620-3045-9042 has been locked", response.message)
+            creditCardRepository.findByNumber("2938-4620-3045-9042")!!.locked.shouldBeTrue()
+            message.shouldBe("Credit card 2938-4620-3045-9042 has been locked")
         }
     }
 
     @Test
     internal fun `should not block the card and return a failure message`() {
-        Mockito.`when`(creditCardClient.lockCreditCard("2938-4620-3045-9042", "grpc"))
-            .thenThrow(HttpClientResponseException::class.java)
+
+        every {
+            creditCardClient.lockCreditCard("2938-4620-3045-9042", "grpc")
+        } throws HttpClientResponseException("", HttpResponse.badRequest(""))
 
         val response = grpcClient.lock(LockGrpcRequest.newBuilder().setCardNumber("2938-4620-3045-9042").setClientIp("0.0.0.0").setUserAgent("firewolf").build())
         with(response){
-            //assertFalse(creditCardRepository.findByNumber("2938-4620-3045-9042")!!.locked)
-            assertEquals("Credit card 2938-4620-3045-9042 hasn't been locked", response.message)
+            creditCardRepository.findByNumber("2938-4620-3045-9042")!!.locked.shouldBeFalse()
+            message.shouldBe("Credit card 2938-4620-3045-9042 hasn't been locked")
         }
     }
 
     @MockBean(CreditCardClient::class)
-    fun mockClient(): CreditCardClient? {
-        return Mockito.mock(CreditCardClient::class.java)
-    }
+    fun mockClient(): CreditCardClient = mockk()
 
     @Factory
     internal class FactoryGrpc{
