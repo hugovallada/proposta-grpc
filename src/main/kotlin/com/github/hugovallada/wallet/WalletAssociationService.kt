@@ -23,7 +23,6 @@ class WalletAssociationService(
     @Inject private val walletRepository: WalletRepository
 ) {
 
-
     fun associate(request: AssociateWalletGrpcRequest): String {
         val creditCard = creditCardRepository.findByNumber(request.cardNumber) ?: throw TargetNotfoundException("Couldn't find credit card with number ${request.cardNumber}")
         if(creditCard.locked) throw UnprocessableEntityException("The credit card is blocked")

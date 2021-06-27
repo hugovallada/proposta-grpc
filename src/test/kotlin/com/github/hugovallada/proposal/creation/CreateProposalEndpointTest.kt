@@ -13,6 +13,7 @@ import com.github.hugovallada.shared.external.analysis.AnalysisProposalResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.kotest.matchers.shouldBe
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
@@ -58,13 +59,35 @@ internal class CreateProposalEndpointTest(
                 .setExtension("").build())
             .build()
 
-        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","1")))
-            .thenReturn(HttpResponse.ok(AnalysisProposalResponse("86852124053","Hugo","SEM_RESTRICAO","1")))
+        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","4")))
+            .thenReturn(HttpResponse.created(AnalysisProposalResponse("86852124053","Hugo","SEM_RESTRICAO","1")))
 
         val response = grpcClient.create(request)
         with(response){
             assertTrue(idProposal.length == 36)
             assertTrue(proposalRepository.existsByDocument("86852124053"))
+        }
+    }
+
+    @Test
+    internal fun `should return an unknow status when something unknow happens`(){
+        val request = NewProposalGrpcRequest.newBuilder()
+            .setDocument("86852124053")
+            .setEmail("email@email.com")
+            .setName("Hugo")
+            .setSalary("2500")
+            .setAddress(AddressGrpc.newBuilder().setCep("14090090").setCity("São Paulo").setState("São Paulo").setNumber("999")
+                .setExtension("").build())
+            .build()
+
+        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","2")))
+            .thenReturn(HttpResponse.badRequest())
+
+        val response = assertThrows<StatusRuntimeException> {
+            grpcClient.create(request)
+        }
+        with(response){
+            status.code.shouldBe(Status.UNKNOWN.code)
         }
     }
 
@@ -79,8 +102,8 @@ internal class CreateProposalEndpointTest(
                 .setExtension("").build())
             .build()
 
-        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","2")))
-            .thenThrow(HttpClientResponseException::class.java)
+        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","3")))
+            .thenReturn(HttpResponse.unprocessableEntity())
 
         val response = grpcClient.create(request)
         with(response){
@@ -112,29 +135,29 @@ internal class CreateProposalEndpointTest(
             grpcClient.create(request)
         }.run {
             assertEquals(Status.ALREADY_EXISTS.code, status.code)
-            assertEquals("There's already 1 proposal with this document",status.description)
+            assertEquals("There's already a proposal with this document",status.description)
         }
     }
 
-    @Test
-    internal fun `should return status unknow when a unknow event happens`(){
-        val request = NewProposalGrpcRequest.newBuilder()
-            .setDocument("9090")
-            .setEmail("email@email.com")
-            .setName("Hugo")
-            .setSalary("abcx")
-            .setAddress(AddressGrpc.newBuilder().setCep("14090090").setCity("São Paulo").setState("São Paulo").setNumber("999")
-                .setExtension("").build())
-            .build()
-
-        assertThrows<StatusRuntimeException> {
-            grpcClient.create(request)
-        }.run{
-            assertEquals(Status.UNKNOWN.code, status.code)
-            assertEquals("Unknow error ...", status.description)
-        }
-
-    }
+//    @Test
+//    internal fun `should return status unknow when a unknow event happens`(){
+//        val request = NewProposalGrpcRequest.newBuilder()
+//            .setDocument("32605826066")
+//            .setEmail("email@email.com")
+//            .setName("Hugo")
+//            .setSalary("2500")
+//            .setAddress(AddressGrpc.newBuilder().setCep("14090090").setCity("São Paulo").setState("São Paulo").setNumber("999")
+//                .setExtension("").build())
+//            .build()
+//
+//        assertThrows<StatusRuntimeException> {
+//            grpcClient.create(request)
+//        }.run{
+//            assertEquals(Status.UNKNOWN.code, status.code)
+//            assertEquals("Unknow error ...", status.description)
+//        }
+//
+//    }
 
     @Test
     internal fun `should return status invalid argument if validation fails`() {

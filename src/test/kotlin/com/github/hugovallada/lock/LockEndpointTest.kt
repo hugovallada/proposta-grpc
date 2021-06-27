@@ -78,11 +78,11 @@ internal class LockEndpointTest(
 
 
     @Test
-    internal fun `should return already exists when an already locked credit card is send`() {
+    internal fun `should return failed precondition when an already locked credit card is send`() {
         assertThrows<StatusRuntimeException> {
             grpcClient.lock(LockGrpcRequest.newBuilder().setCardNumber("2938-4620-3045-9041").setClientIp("0.0.0.0").setUserAgent("firewolf").build())
         }.run {
-            assertEquals(Status.ALREADY_EXISTS.code, status.code)
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
         }
     }
 

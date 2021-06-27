@@ -16,14 +16,17 @@ import io.grpc.StatusRuntimeException
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldBeEmpty
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldContainIgnoringCase
 import io.kotest.matchers.string.shouldNotBeBlank
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
+import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -32,6 +35,9 @@ import io.mockk.verify
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
+import java.lang.IllegalStateException
+import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -45,7 +51,8 @@ internal class WalletAssociationEndpointTest(
     @Inject private val creditCardRepository: CreditCardRepository,
     @Inject private val walletRepository: WalletRepository
 ){
-
+    @Inject
+    lateinit var creditCardClient: CreditCardClient
 
     @Test
     internal fun `should return status not found when credit card number doesn't exist`() {
@@ -74,6 +81,28 @@ internal class WalletAssociationEndpointTest(
         }
     }
 
+    @Test
+    internal fun `should return status unknown when something wrong happens`() {
+        val creditCard = CreditCard("7297-2922-0882-0282", LocalDateTime.now(),"Hugo", BigDecimal(2500),
+            ExpirationDate(UUID.randomUUID().toString(),25, LocalDateTime.now())
+        )
+        creditCardRepository.save(creditCard)
+
+
+        every {
+            creditCardClient.associate("7297-2922-0882-0282", AssociateWalletClientRequest("email@email.com","PAYPALL"))
+        } throws RuntimeException("")
+
+
+        assertThrows<StatusRuntimeException> {
+            grpcClient.associate(AssociateWalletGrpcRequest.newBuilder()
+                .setCardNumber("7297-2922-0882-0282").setEmail("email@email.com").setWallet("PAYPALL").build())
+        }.run {
+            status.description.shouldBe("Unknow error ...")
+            status.code.shouldBe(Status.UNKNOWN.code)
+        }
+
+    }
 
     @Test
     internal fun `should return status invalid argument when data is invalid`() {
@@ -87,6 +116,21 @@ internal class WalletAssociationEndpointTest(
         }.run {
             status.code.shouldBe(Status.INVALID_ARGUMENT.code)
             status.description.shouldContain("Invalid email")
+        }
+    }
+
+    @Test
+    internal fun `should return status invalid argument when wallet type is invalid`() {
+        val creditCard = CreditCard("0999-2922-0882-0282", LocalDateTime.now(),"Hugo", BigDecimal(2500),
+            ExpirationDate(UUID.randomUUID().toString(),25, LocalDateTime.now())
+        )
+        creditCardRepository.save(creditCard)
+        assertThrows<StatusRuntimeException> {
+            grpcClient.associate(AssociateWalletGrpcRequest.newBuilder()
+                .setCardNumber("0999-2922-0882-0282").setEmail("ktc@gmail.com").setWallet("PAYPA").build())
+        }.run {
+            status.code.shouldBe(Status.INVALID_ARGUMENT.code)
+            status.description.shouldContainIgnoringCase("Wallet Type not found")
         }
     }
 
@@ -110,7 +154,6 @@ internal class WalletAssociationEndpointTest(
         }
     }
 
-    // TODO: mockk not working
     @Test
     internal fun `should return failure message when an exception occurs in the external client`() {
         val creditCard = CreditCard("9297-2922-0882-0282", LocalDateTime.now(),"Hugo", BigDecimal(2500),
@@ -118,12 +161,10 @@ internal class WalletAssociationEndpointTest(
         )
         creditCardRepository.save(creditCard)
 
-        val creditClient = mockk<CreditCardClient>()
 
         every {
-            creditClient.associate("9297-2922-0882-0282", AssociateWalletClientRequest("email@email.com","PAYPALL"))
+            creditCardClient.associate("9297-2922-0882-0282", AssociateWalletClientRequest("email@email.com","PAYPALL"))
         } throws HttpClientResponseException("", HttpResponse.serverError(""))
-
 
         val grpcResponse = grpcClient.associate(AssociateWalletGrpcRequest.newBuilder()
             .setCardNumber("9297-2922-0882-0282").setEmail("email@email.com").setWallet("PAYPALL").build())
@@ -141,19 +182,24 @@ internal class WalletAssociationEndpointTest(
         )
         creditCardRepository.save(creditCard)
 
-        mockk<CreditCardClient>{
-            every {
-                associate("8297-2922-0882-0282", AssociateWalletClientRequest("email@email.com", "PAYPALL"))
+
+        every {
+                creditCardClient.associate("8297-2922-0882-0282", AssociateWalletClientRequest("email@email.com", "PAYPALL"))
             }.returns(AssociateWalletClientResponse("ASSOCIADA",UUID.randomUUID().toString()))
-        }
+
 
         val grpcResponse = grpcClient.associate(AssociateWalletGrpcRequest.newBuilder()
             .setCardNumber("8297-2922-0882-0282").setEmail("email@email.com").setWallet("PAYPALL").build())
 
         with(grpcResponse){
             message.shouldNotBeBlank()
-            message.shouldBe("Credit card 8297-2922-0882-0282 was associated with wallet PAYPALL")
+            message.shouldBe("Credit card 8297-2922-0882-0282 associated with wallet PAYPALL")
         }
+    }
+
+    @MockBean(CreditCardClient::class)
+    fun mockkCreditCardClient() : CreditCardClient {
+        return mockk()
     }
 
     @Factory
