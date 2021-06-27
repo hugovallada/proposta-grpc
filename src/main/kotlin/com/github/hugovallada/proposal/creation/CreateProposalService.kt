@@ -41,7 +41,7 @@ class CreateProposalService(
                 status = when{
                     it.status == HttpStatus.CREATED -> ProposalStatus.ELIGIBLE
                     it.status == HttpStatus.UNPROCESSABLE_ENTITY -> ProposalStatus.NOT_ELIGIBLE
-                    else -> throw HttpClientResponseException("", HttpResponse.badRequest(""))
+                    else -> throw HttpClientResponseException("", HttpResponse.serverError(""))
                 }
 
                 return proposalRepository.update(this)

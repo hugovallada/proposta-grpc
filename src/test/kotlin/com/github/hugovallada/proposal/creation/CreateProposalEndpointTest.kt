@@ -62,7 +62,7 @@ internal class CreateProposalEndpointTest(
             .build()
 
         every {
-            analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","4"))
+            analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","5"))
         } returns HttpResponse.created(AnalysisProposalResponse("86852124053","Hugo","SEM_RESTRICAO","1"))
 
         val response = grpcClient.create(request)
@@ -107,7 +107,7 @@ internal class CreateProposalEndpointTest(
             .build()
 
         every {
-            analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","3"))
+            analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","2"))
         } returns (HttpResponse.unprocessableEntity())
 
         val response = grpcClient.create(request)
@@ -164,8 +164,26 @@ internal class CreateProposalEndpointTest(
         }
     }
 
+    @Test
+    internal fun `should return status unknown when there's an error within the external client`() {
+        val request = NewProposalGrpcRequest.newBuilder()
+            .setDocument("23509040082")
+            .setEmail("email@email.com")
+            .setName("Hugo")
+            .setSalary("2500")
+            .setAddress(AddressGrpc.newBuilder().setCep("14090090").setCity("São Paulo").setState("São Paulo").setNumber("999")
+                .setExtension("").build())
+            .build()
 
+        every {
+            analysisClient.analyze(AnalysisProposalRequest("23509040082","Hugo","4"))
+        } returns HttpResponse.badRequest()
 
+        val response = assertThrows<StatusRuntimeException> {  grpcClient.create(request) }
+        with(response){
+            status.code.shouldBe(Status.UNKNOWN.code)
+        }
+    }
 
     @MockBean(AnalysisClient::class)
     internal fun mockAnalysisService(): AnalysisClient = mockk()
