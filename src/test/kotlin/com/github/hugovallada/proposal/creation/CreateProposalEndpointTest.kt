@@ -22,6 +22,8 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import io.mockk.every
+import io.mockk.mockk
 import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.*
@@ -59,8 +61,9 @@ internal class CreateProposalEndpointTest(
                 .setExtension("").build())
             .build()
 
-        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","4")))
-            .thenReturn(HttpResponse.created(AnalysisProposalResponse("86852124053","Hugo","SEM_RESTRICAO","1")))
+        every {
+            analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","4"))
+        } returns HttpResponse.created(AnalysisProposalResponse("86852124053","Hugo","SEM_RESTRICAO","1"))
 
         val response = grpcClient.create(request)
         with(response){
@@ -70,7 +73,7 @@ internal class CreateProposalEndpointTest(
     }
 
     @Test
-    internal fun `should return an unknow status when something unknow happens`(){
+    internal fun `should return an unknown status when something unknown happens`(){
         val request = NewProposalGrpcRequest.newBuilder()
             .setDocument("86852124053")
             .setEmail("email@email.com")
@@ -80,8 +83,9 @@ internal class CreateProposalEndpointTest(
                 .setExtension("").build())
             .build()
 
-        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","2")))
-            .thenReturn(HttpResponse.badRequest())
+        every {
+            analysisClient.analyze(AnalysisProposalRequest("86852124053","Hugo","2"))
+        } returns HttpResponse.badRequest()
 
         val response = assertThrows<StatusRuntimeException> {
             grpcClient.create(request)
@@ -102,8 +106,9 @@ internal class CreateProposalEndpointTest(
                 .setExtension("").build())
             .build()
 
-        Mockito.`when`(analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","3")))
-            .thenReturn(HttpResponse.unprocessableEntity())
+        every {
+            analysisClient.analyze(AnalysisProposalRequest("32605826066","Hugo","3"))
+        } returns (HttpResponse.unprocessableEntity())
 
         val response = grpcClient.create(request)
         with(response){
@@ -139,25 +144,6 @@ internal class CreateProposalEndpointTest(
         }
     }
 
-//    @Test
-//    internal fun `should return status unknow when a unknow event happens`(){
-//        val request = NewProposalGrpcRequest.newBuilder()
-//            .setDocument("32605826066")
-//            .setEmail("email@email.com")
-//            .setName("Hugo")
-//            .setSalary("2500")
-//            .setAddress(AddressGrpc.newBuilder().setCep("14090090").setCity("São Paulo").setState("São Paulo").setNumber("999")
-//                .setExtension("").build())
-//            .build()
-//
-//        assertThrows<StatusRuntimeException> {
-//            grpcClient.create(request)
-//        }.run{
-//            assertEquals(Status.UNKNOWN.code, status.code)
-//            assertEquals("Unknow error ...", status.description)
-//        }
-//
-//    }
 
     @Test
     internal fun `should return status invalid argument if validation fails`() {
@@ -182,9 +168,7 @@ internal class CreateProposalEndpointTest(
 
 
     @MockBean(AnalysisClient::class)
-    internal fun mockAnalysisService(): AnalysisClient? {
-        return Mockito.mock(AnalysisClient::class.java)
-    }
+    internal fun mockAnalysisService(): AnalysisClient = mockk()
 
     @Factory
     internal class GrpcFactory {
