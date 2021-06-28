@@ -7,6 +7,8 @@ import com.github.hugovallada.proposal.ProposalStatus
 import com.github.hugovallada.shared.external.credit_card.CreditCardClient
 import com.github.hugovallada.shared.external.credit_card.CreditCardClientResponse
 import com.github.hugovallada.shared.external.credit_card.ExpirationDateClientResponse
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
@@ -62,7 +64,7 @@ internal class CreditCardAssociationSchedulerTest(
 
         CreditCardAssociationScheduler(proposalRepository, creditCardClient).associate()
 
-        assertTrue(proposalRepository.findByDocument("11793195080")!!.creditCard != null)
+        proposalRepository.findByDocument("11793195080")!!.creditCard.shouldNotBeNull()
     }
 
     @Test
@@ -80,7 +82,7 @@ internal class CreditCardAssociationSchedulerTest(
 
         CreditCardAssociationScheduler(proposalRepository, creditCardClient).associate()
 
-        assertTrue(proposalRepository.findByDocument("32605826066")!!.creditCard == null)
+        proposalRepository.findByDocument("32605826066")!!.creditCard.shouldBeNull()
     }
 
     @Test
@@ -103,7 +105,7 @@ internal class CreditCardAssociationSchedulerTest(
 
         CreditCardAssociationScheduler(proposalRepository, creditCardClient).associate()
 
-        assertTrue(proposalRepository.findByDocument("85805077078")!!.creditCard == null)
+        proposalRepository.findByDocument("85805077078")!!.creditCard.shouldBeNull()
     }
 
     @MockBean(CreditCardClient::class)
