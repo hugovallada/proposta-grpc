@@ -7,9 +7,14 @@ import com.github.hugovallada.proposal.ProposalStatus
 import com.github.hugovallada.shared.external.credit_card.CreditCardClient
 import com.github.hugovallada.shared.external.credit_card.CreditCardClientResponse
 import com.github.hugovallada.shared.external.credit_card.ExpirationDateClientResponse
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import io.mockk.every
+import io.mockk.mockk
 import io.reactivex.Single
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -41,27 +46,25 @@ internal class CreditCardAssociationSchedulerTest(
         proposal.status = ProposalStatus.ELIGIBLE
         proposalRepository.save(proposal)
 
-
-
-        Mockito.`when`(creditCardClient.getCreditCard(proposal.id.toString())).thenReturn(
-            Single.just(CreditCardClientResponse(
-                id = "6929-6084-4630-3370",
-                emitidoEm = LocalDateTime.now(),
-                titular = proposal.name,
-                bloqueios = listOf<String>(),
-                avisos =  listOf<String>(),
-                carteiras = listOf<String>(),
-                parcelas = listOf<String>(),
-                limite = 2000,
-                renegociacao = null,
-                vencimento = ExpirationDateClientResponse(id = "28288282",dia = 20,dataDeCriacao = LocalDateTime.now()),
-                idProposta = proposal.id.toString()
-            ))
-        )
+        every{
+            creditCardClient.getCreditCard(proposal.id.toString())
+        }returns(Single.just(CreditCardClientResponse(
+            id = "6929-6084-4630-3370",
+            emitidoEm = LocalDateTime.now(),
+            titular = proposal.name,
+            bloqueios = listOf<String>(),
+            avisos =  listOf<String>(),
+            carteiras = listOf<String>(),
+            parcelas = listOf<String>(),
+            limite = 2000,
+            renegociacao = null,
+            vencimento = ExpirationDateClientResponse(id = "28288282",dia = 20,dataDeCriacao = LocalDateTime.now()),
+            idProposta = proposal.id.toString()
+        )))
 
         CreditCardAssociationScheduler(proposalRepository, creditCardClient).associate()
 
-        assertTrue(proposalRepository.findByDocument("11793195080")!!.creditCard != null)
+        proposalRepository.findByDocument("11793195080")!!.creditCard.shouldNotBeNull()
     }
 
     @Test
@@ -79,7 +82,7 @@ internal class CreditCardAssociationSchedulerTest(
 
         CreditCardAssociationScheduler(proposalRepository, creditCardClient).associate()
 
-        assertTrue(proposalRepository.findByDocument("32605826066")!!.creditCard == null)
+        proposalRepository.findByDocument("32605826066")!!.creditCard.shouldBeNull()
     }
 
     @Test
@@ -95,20 +98,17 @@ internal class CreditCardAssociationSchedulerTest(
         proposal.status = ProposalStatus.ELIGIBLE
         proposalRepository.save(proposal)
 
-
-
-        Mockito.`when`(creditCardClient.getCreditCard(proposal.id.toString())).
-            thenThrow(HttpClientResponseException::class.java)
+        every {
+            creditCardClient.getCreditCard(proposal.id.toString())
+        } throws (HttpClientResponseException("", HttpResponse.badRequest("")))
 
 
         CreditCardAssociationScheduler(proposalRepository, creditCardClient).associate()
 
-        assertTrue(proposalRepository.findByDocument("85805077078")!!.creditCard == null)
+        proposalRepository.findByDocument("85805077078")!!.creditCard.shouldBeNull()
     }
 
     @MockBean(CreditCardClient::class)
-    fun mockCrediCardClient(): CreditCardClient {
-        return Mockito.mock(CreditCardClient::class.java)
-    }
+    fun mockCrediCardClient(): CreditCardClient = mockk()
 
 }

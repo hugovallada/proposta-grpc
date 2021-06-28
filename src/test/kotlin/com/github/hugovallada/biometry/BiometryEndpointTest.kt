@@ -10,6 +10,10 @@ import com.github.hugovallada.credit_card.ExpirationDate
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeBlank
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
@@ -59,9 +63,9 @@ internal class BiometryEndpointTest(
         )
 
         with(response){
-            assertTrue(biometryRepository.existsByFingerPrint(fingerprint))
-            assertTrue(response.id.isNotBlank())
-            assertTrue(response.id.length == 36)
+            biometryRepository.existsByFingerPrint(fingerprint).shouldBeTrue()
+            id.shouldNotBeBlank()
+            id.length.shouldBeExactly(36)
         }
     }
 
@@ -71,8 +75,8 @@ internal class BiometryEndpointTest(
         assertThrows<StatusRuntimeException>{
             grpcClient.assign(BiometryGrpcRequest.newBuilder().setFingerPrint("jidjiadjiahdhahduhad").setCardNumber(cardNumber).build())
         }.run {
-            assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Credit card with number $cardNumber not found", status.description)
+            status.code.shouldBe(Status.NOT_FOUND.code)
+            status.description.shouldBe("Credit card with number $cardNumber not found")
         }
     }
 
@@ -82,8 +86,8 @@ internal class BiometryEndpointTest(
         assertThrows<StatusRuntimeException>{
             grpcClient.assign(BiometryGrpcRequest.newBuilder().setFingerPrint("").setCardNumber(cardNumber).build())
         }.run {
-            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
-            assertEquals("fingerPrint: Should not be blank", status.description)
+            status.code.shouldBe(Status.INVALID_ARGUMENT.code)
+            status.description.shouldBe("fingerPrint: Should not be blank")
         }
     }
 
@@ -95,8 +99,8 @@ internal class BiometryEndpointTest(
         assertThrows<StatusRuntimeException> {
             grpcClient.assign(BiometryGrpcRequest.newBuilder().setFingerPrint("TWluaGEgRmluZ2VycHJpb250IHp1YWRhw6dhc2RhZGFkYQ==").setCardNumber("6929-6084-4630-3370").build())
         }.run {
-            assertEquals(Status.ALREADY_EXISTS.code, status.code)
-            assertEquals("This biometry has already been assigned to a credit card",status.description)
+            status.code.shouldBe(Status.ALREADY_EXISTS.code)
+            status.description.shouldBe("This biometry has already been assigned to a credit card")
         }
     }
 

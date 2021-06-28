@@ -56,6 +56,8 @@ dependencies {
 
     testImplementation("io.micronaut:micronaut-http-client")
 
+    testImplementation("io.mockk:mockk:1.10.6")
+
 }
 
 
@@ -78,9 +80,9 @@ tasks {
         }
     }
 
-    test{
-        useJUnitPlatform()
-    }
+//    test{
+//        useJUnitPlatform()
+//    }
 
 
 }

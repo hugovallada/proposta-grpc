@@ -11,6 +11,7 @@ import com.github.hugovallada.proposal.ProposalStatus
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.kotest.matchers.shouldBe
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
@@ -38,8 +39,8 @@ internal class ProposalDetailEndpointTest(
             grpcClient.watch(ProposalStatusGrpcRequest.newBuilder()
                 .setId(id).build())
         }.run {
-            assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Can't find proposal with id: $id", status.description)
+            status.code.shouldBe(Status.NOT_FOUND.code)
+            status.description.shouldBe("Can't find proposal with id: $id")
         }
     }
 
@@ -67,13 +68,13 @@ internal class ProposalDetailEndpointTest(
         val response =
             grpcClient.watch(ProposalStatusGrpcRequest.newBuilder().setId(proposal.externalId.toString()).build())
 
-
-        assertEquals(creditCard.number,response.creditCard)
-        assertEquals(proposal.document, response.documet)
-        assertEquals(proposal.name, response.name)
-        assertEquals(proposal.status.toString(), response.status.toString())
-        assertEquals(proposal.email, response.email)
-
+        with(response){
+            creditCard.number.shouldBe(creditCard.number)
+            documet.shouldBe(proposal.document)
+            name.shouldBe(proposal.name)
+            status.toString().shouldBe(proposal.status.toString())
+            email.shouldBe(proposal.email)
+        }
     }
 
     @Factory

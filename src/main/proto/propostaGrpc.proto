@@ -29,6 +29,20 @@ service TravelNotice{
   rpc notificate(TravelNoticeGrpcRequest) returns (TravelNoticeGrpcResponse){}
 }
 
+service AssociateWallet{
+  rpc associate(AssociateWalletGrpcRequest) returns (AssociateWalletGrpcResponse){}
+}
+
+message AssociateWalletGrpcRequest{
+  string cardNumber = 1;
+  string email = 2;
+  string wallet = 3;
+}
+
+message AssociateWalletGrpcResponse{
+  string message = 1;
+}
+
 message TravelNoticeGrpcRequest{
   string cardNumber = 1;
   string destination = 2;
