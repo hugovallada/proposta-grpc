@@ -13,6 +13,8 @@ import com.github.hugovallada.shared.external.analysis.AnalysisProposalResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
@@ -67,8 +69,8 @@ internal class CreateProposalEndpointTest(
 
         val response = grpcClient.create(request)
         with(response){
-            assertTrue(idProposal.length == 36)
-            assertTrue(proposalRepository.existsByDocument("86852124053"))
+            idProposal.length.shouldBeExactly(36)
+            proposalRepository.existsByDocument("86852124053").shouldBeTrue()
         }
     }
 
@@ -112,9 +114,9 @@ internal class CreateProposalEndpointTest(
 
         val response = grpcClient.create(request)
         with(response){
-            assertTrue(idProposal.length == 36)
-            assertTrue(proposalRepository.existsByDocument("32605826066"))
-            assertEquals(ProposalStatus.NOT_ELIGIBLE, proposalRepository.findByDocument("32605826066")?.status)
+            idProposal.length.shouldBeExactly(36)
+            proposalRepository.existsByDocument("32605826066")
+            proposalRepository.findByDocument("32605826066")?.status.shouldBe(ProposalStatus.NOT_ELIGIBLE)
         }
     }
 
@@ -139,8 +141,8 @@ internal class CreateProposalEndpointTest(
         assertThrows<StatusRuntimeException> {
             grpcClient.create(request)
         }.run {
-            assertEquals(Status.ALREADY_EXISTS.code, status.code)
-            assertEquals("There's already a proposal with this document",status.description)
+            status.code.shouldBe(Status.ALREADY_EXISTS.code)
+            status.description.shouldBe("There's already a proposal with this document")
         }
     }
 
@@ -159,8 +161,8 @@ internal class CreateProposalEndpointTest(
         assertThrows<StatusRuntimeException> {
             grpcClient.create(request)
         }.run{
-            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
-            assertEquals("document: Document invalid", status.description)
+            status.code.shouldBe(Status.INVALID_ARGUMENT.code)
+            status.description.shouldBe("document: Document invalid")
         }
     }
 
